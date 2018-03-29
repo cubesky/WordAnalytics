@@ -1,0 +1,44 @@
+group 'party.liyin'
+version '1.0'
+
+apply plugin: 'java'
+apply plugin: 'maven'
+apply plugin: 'maven-publish'
+
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
+repositories {
+    mavenCentral()
+}
+
+publishing {
+    publications {
+        mavenJava(MavenPublication){
+            from components.java
+        }
+    }
+    repositories {
+        maven {
+            url 'D:\\Development\\WorkSpace\\GitSpace\\cubesky-mvn.github.io'
+        }
+    }
+}
+
+dependencies {
+    testCompile group: 'junit', name: 'junit', version: '4.12'
+
+    // https://mvnrepository.com/artifact/org.apache.lucene/lucene-core
+    compile 'org.apache.lucene:lucene-core:7.2.1'
+    // https://mvnrepository.com/artifact/org.apache.lucene/lucene-analyzers-common
+    compile 'org.apache.lucene:lucene-analyzers-common:7.2.1'
+// https://mvnrepository.com/artifact/org.apache.lucene/lucene-queryparser
+    compile 'org.apache.lucene:lucene-queryparser:7.2.1'
+    // https://mvnrepository.com/artifact/com.hankcs/hanlp
+    compile group: 'com.hankcs', name: 'hanlp', version: 'portable-1.6.0'
+
+// https://mvnrepository.com/artifact/com.hankcs/hanlp
+    compile group: 'com.hankcs.nlp', name: 'hanlp-lucene-plugin', version: '1.1.3'
+
+
+}
