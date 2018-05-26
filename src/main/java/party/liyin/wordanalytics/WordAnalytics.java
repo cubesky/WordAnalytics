@@ -26,12 +26,12 @@ public class WordAnalytics implements Closeable {
     private IndexWriter writer;
     private HanLPAnalyzer analyzer;
     private ScoreDoc lastScoreDoc;
+    private boolean readonly;
 
-    public WordAnalytics(String documentIndexDir) throws IOException {
-        this(new File(documentIndexDir));
+    public WordAnalytics(String documentIndexDir, boolean readonly) throws IOException {
+        this(new File(documentIndexDir), readonly);
     }
-
-    public WordAnalytics(File documentIndexDir) throws IOException {
+    public WordAnalytics(File documentIndexDir, boolean readonly) throws IOException {
         if(!documentIndexDir.exists()){
             documentIndexDir.mkdir();
         } else {
@@ -42,9 +42,20 @@ public class WordAnalytics implements Closeable {
         }
         analyzer = new HanLPAnalyzer();
         niofsDirectory = new NIOFSDirectory(documentIndexDir.toPath());
-        IndexWriterConfig indexWriterConfig = new IndexWriterConfig(analyzer);
-        indexWriterConfig.setOpenMode(IndexWriterConfig.OpenMode.CREATE_OR_APPEND);
-        writer = new IndexWriter(niofsDirectory, indexWriterConfig);
+        this.readonly = readonly;
+        if (!readonly) {
+            IndexWriterConfig indexWriterConfig = new IndexWriterConfig(analyzer);
+            indexWriterConfig.setOpenMode(IndexWriterConfig.OpenMode.CREATE_OR_APPEND);
+            writer = new IndexWriter(niofsDirectory, indexWriterConfig);
+        }
+    }
+
+    public WordAnalytics(String documentIndexDir) throws IOException {
+        this(new File(documentIndexDir));
+    }
+
+    public WordAnalytics(File documentIndexDir) throws IOException {
+        this(documentIndexDir, false);
     }
 
     public ArrayList<Document> search(String title, String querystr, int hitsperpage) throws ParseException, IOException {
@@ -81,13 +92,14 @@ public class WordAnalytics implements Closeable {
     }
 
     public void addDoc(Document document) throws IOException {
+        if(readonly) throw new ReadOnlyException();
         writer.addDocument(document);
         writer.commit();
     }
 
     @Override
     public void close() throws IOException {
-        writer.close();
+        if (!readonly) writer.close();
         niofsDirectory.close();
     }
 }
